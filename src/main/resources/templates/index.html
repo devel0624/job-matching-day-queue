@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Management</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .highlight {
+            background-color: rgba(255, 68, 0, 0.53);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container my-5">
+
+    <h2 class="mb-4">인터뷰 대기 관리</h2>
+
+    Companies
+    [[${companies}]]
+
+
+    <br/>
+
+    <br/>
+    reservations
+    [[${interviewReservations}]]
+
+    <br/>
+<!--    0번 추출-->
+
+    <br/>
+    progresses
+    [[${interviewInProgress}]]
+
+<!--    model.addAttribute("companies", companies);-->
+<!--    model.addAttribute("interviewReservations", reservations);-->
+<!--    model.addAttribute("interviewInProgress", inProgress);-->
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+        <tr>
+            <th class="col-1">회사명</th>
+            <th class="col-1">완료</th>
+            <th class="col-2">진행 명단</th> <!-- 대기자 명단 열 너비 고정 -->
+            <th class="col-1">취소</th>
+            <th class="col-1">시작</th>
+            <th class="col-3">대기자 명단</th> <!-- 대기자 명단 열 너비 고정 -->
+            <th class="col-2">대기 등록</th>
+        </tr>
+        </thead>
+        <tbody>
+
+
+        <tr th:each="company : ${companies}" th:data-company-id="${company.id}">
+
+<!--            회사 이름-->
+            <td class="align-middle text-center">
+                <form action="/company/delete" method="post">
+                    <input name="companyNo" th:value="${company.id}" hidden>
+                    <button type="submit" class="card btn delete-company">
+                        <span th:text="${company.name}"></span>
+                    </button>
+                </form>
+            </td>
+
+<!--            인터뷰 완료 버튼-->
+            <td class="align-middle">
+                <form action="/interview/process/finish" method="post">
+                    <input name="companyNo" th:value="${company.id}" hidden>
+                    <button class="btn btn-success finish-interview" type="submit">완료</button>
+                </form>
+            </td>
+
+<!--            진행 중인 인터뷰 목록-->
+            <td class="align-middle">
+                <div class="d-flex flex-wrap gap-2 progress-container"
+                     th:data-progress-list="${#strings.arrayJoin(interviewInProgress[company.id].![student.traineeNo], ',')}">
+                    <div class="d-inline"
+                      th:each="progress : ${interviewInProgress[company.id]}">
+                        <span class="btn btn-primary">
+                            <span th:text="${progress.student.name}"></span>
+                        </span>
+                    </div>
+                </div>
+            </td>
+
+<!--            진행 취소 버튼-->
+            <td class="align-middle">
+                <form action="/interview/process/rollback" method="post">
+                    <input name="companyNo" th:value="${company.id}" hidden>
+                    <button class="btn btn-success rollback-interview" type="submit">취소</button>
+                </form>
+            </td>
+
+<!--            진행 추가 버튼-->
+            <td class="align-middle">
+                <form action="/interview/process/start" method="post">
+                    <input name="companyNo" th:value="${company.id}" hidden>
+                    <button class="btn btn-success start-interview" type="submit">시작</button>
+                </form>
+            </td>
+
+<!--            대기자 명단-->
+            <td class="align-middle">
+                <div class="d-flex flex-wrap gap-2">
+                    <form action="/reservation/delete" method="post" class="d-inline"
+                          th:each="reservation, iterStat : ${interviewReservations[company.id]}">
+                        <input name="companyNo" th:value="${company.id}" hidden>
+                        <input type="hidden" name="order" th:value="${reservation.order}">
+                        <button type="submit" class="card btn delete-reservation"
+                            th:data-student-id="${reservation.student.traineeNo}">
+                            <span>
+                                <span th:text="${iterStat.index + 1}"></span>
+                                . <span th:text="${reservation.student.name}"></span>
+                            </span>
+                        </button>
+                    </form>
+                </div>
+            </td>
+
+<!--            대기자 추가 버튼 -->
+            <td >
+                <form action="/reservation" method="post">
+                    <div class="d-flex">
+                        <input name="companyNo" th:value="${company.id}" hidden>
+                        <input name="studentName" class="form-control me-2" type="text" placeholder="학생 이름">
+                        <button type="submit" class="btn btn-primary col-3">예약</button>
+                    </div>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h3 class="my-4">회사 등록</h3>
+    <form action="/company" method="post" class="d-flex">
+        <div class="mb-3 me-3 flex-grow-1">
+            <input name="name" class="form-control" type="text" placeholder="회사 이름">
+        </div>
+        <button type="submit" class="btn btn-info">등록</button>
+    </form>
+
+</div>
+
+<div class="container my-5">
+    <h2>참가자 명단</h2>
+    <table class="table table-bordered">
+        <thead class="table-dark">
+        <tr>
+            <th>연수생 번호</th>
+            <th>이름</th>
+            <th>인터뷰 진행 횟수</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="student : ${students}">
+            <td th:text="${student.getTraineeNo()}"></td>
+            <td th:text="${student.getName()}"></td>
+            <td th:text="${student.getInterviewCount()}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <form action="/student" method="post">
+        <div class="mb-3 d-flex">
+            <input name="traineeNo" class="form-control me-2" type="text" placeholder="연수생 번호">
+            <input name="traineeName" class="form-control me-2" type="text" placeholder="연수생 이름">
+            <button type="submit" class="btn btn-primary w-25">추가</button>
+        </div>
+    </form>
+</div>
+
+<!-- Bootstrap 5 JS & Popper.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+<script>
+    const finish_interview_buttons = document.querySelectorAll(".finish-interview");
+
+    finish_interview_buttons.forEach(function (button) {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+
+            if (confirm("인터뷰 완료")) {
+                alert("해당 회사에서 진행 중인 목록을 비웠습니다.");
+                button.closest("form").submit();
+            } else {
+                alert("취소되었습니다.");
+            }
+        });
+    });
+
+    const start_interview_buttons = document.querySelectorAll(".start-interview");
+    start_interview_buttons.forEach(function (button) {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+
+            if (confirm("인터뷰 시작")) {
+                alert("우선 순위가 가장 높은 대상을 목록에 추가하였습니다.");
+                button.closest("form").submit();
+            } else {
+                alert("취소되었습니다.");
+            }
+        });
+    });
+
+    const rollback_interview_buttons = document.querySelectorAll(".rollback-interview");
+    rollback_interview_buttons.forEach(function (button) {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+
+            if (confirm("인터뷰 취소")) {
+                alert("가장 마지막에 추가된 항목을 되돌렸습니다.");
+                button.closest("form").submit();
+            } else {
+                alert("취소되었습니다.");
+            }
+        });
+    });
+
+
+    const remove_company_buttons = document.querySelectorAll(".delete-company");
+
+    remove_company_buttons.forEach(function (button) {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+
+            if (confirm("참가 회사를 제거하시겠습니까?")) {
+                alert("항목에서 제거하였습니다.");
+                button.closest("form").submit();
+            } else {
+                alert("취소되었습니다.");
+            }
+        });
+    });
+
+    const remove_reservation_buttons = document.querySelectorAll(".delete-reservation");
+
+    remove_reservation_buttons.forEach(function (button) {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+
+            if (confirm("대기열에서 삭제하시겠습니까?")) {
+                alert("항목에서 제거하였습니다.");
+                button.closest("form").submit();
+            } else {
+                alert("취소되었습니다.");
+            }
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        let globalProgressList = new Set(); // 진행 중인 모든 학생 ID 저장
+
+        // 모든 진행 명단에서 학생 ID 수집
+        document.querySelectorAll(".progress-container").forEach(container => {
+            let progressData = container.getAttribute("data-progress-list");
+            if (progressData) {
+                progressData.split(",").forEach(id => {
+                    globalProgressList.add(id.trim());
+                });
+            }
+        });
+
+        console.log("🔍 진행 중인 학생 목록:", globalProgressList);
+
+        // 대기자 명단을 돌면서 진행 중인지 확인
+        document.querySelectorAll(".delete-reservation").forEach(button => {
+            let studentId = button.getAttribute("data-student-id")?.trim();
+            if (studentId && globalProgressList.has(studentId)) {
+                button.classList.add("highlight");
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

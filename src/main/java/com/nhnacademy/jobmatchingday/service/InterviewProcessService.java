@@ -27,8 +27,8 @@ public class InterviewProcessService {
         this.interviewReservationQueue = interviewReservationQueue;
     }
 
-    public void interviewStark(Long companyId){
-        Reservation reservation = interviewReservationQueue.removeFirstReservation(companyId);
+    public void interviewStart(Long companyId, Long order){
+        Reservation reservation = interviewReservationQueue.removeReservationByOrder(companyId, order);
         interviewProcessStack.push(companyId, reservation);
     }
 

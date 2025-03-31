@@ -22,8 +22,8 @@ public class InterviewProcessController {
     }
 
     @PostMapping("/start")
-    public String startInterview(@RequestParam Long companyNo) {
-        interviewProcessService.interviewStark(companyNo);
+    public String startInterview(@RequestParam Long companyNo, @RequestParam Long order) {
+        interviewProcessService.interviewStart(companyNo, order);
         return "redirect:/";
     }
 

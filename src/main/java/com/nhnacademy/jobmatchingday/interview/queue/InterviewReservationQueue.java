@@ -96,15 +96,16 @@ public class InterviewReservationQueue {
      * @param companyNo
      * @param order
      */
-    public void removeReservationByOrder(Long companyNo, Long order) {
+    public Reservation removeReservationByOrder(Long companyNo, Long order) {
         List<Reservation> reservations = interviewQueueMap.get(companyNo);
 
         for (int i = 0; i < reservations.size(); i++) {
             if (reservations.get(i).getOrder() == order) {
-                reservations.remove(i);
-                break;
+                return reservations.remove(i);
             }
         }
+
+        return null;
     }
 
     /**

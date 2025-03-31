@@ -10,10 +10,12 @@ public class Company {
 
     private Long id;
     private String companyName;
+    private int interviewCount;
 
     public Company(Long id, String companyName) {
         this.id = id;
         this.companyName = companyName;
+        this.interviewCount = 0;
     }
 
     public Long getId() {
@@ -29,6 +31,19 @@ public class Company {
         return "Company{" +
                 "id=" + id +
                 ", companyName='" + companyName + '\'' +
+                ", interviewCount=" + interviewCount +
                 '}';
+    }
+
+    public int getInterviewCount() {
+        return interviewCount;
+    }
+
+    public void increaseInterviewCount() {
+        interviewCount++;
+    }
+
+    public void setInterviewCount(Integer interviewCount) {
+        this.interviewCount = interviewCount;
     }
 }

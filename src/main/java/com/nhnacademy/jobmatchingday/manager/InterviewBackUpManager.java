@@ -111,8 +111,10 @@ public class InterviewBackUpManager {
                 map -> {
                     Integer companyNo = (Integer) map.get("id");
                     String name = (String) map.get("name");
+                    Integer interviewCount = (Integer) map.get("interviewCount");
 
                     Company company = new Company(companyNo.longValue(), name);
+                    company.setInterviewCount(interviewCount);
                     companyRepository.save(company);
                 }
         );

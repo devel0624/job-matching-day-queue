@@ -3,12 +3,14 @@ package com.nhnacademy.jobmatchingday.interview.queue;
 import com.nhnacademy.jobmatchingday.domain.Company;
 import com.nhnacademy.jobmatchingday.domain.Reservation;
 import com.nhnacademy.jobmatchingday.domain.Student;
+import com.nhnacademy.jobmatchingday.repo.CompanyRepository;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
@@ -23,8 +25,10 @@ import org.springframework.stereotype.Component;
 public class InterviewReservationQueue {
 
     private Map<Long, LinkedList<Reservation>> interviewQueueMap;
+    private final CompanyRepository companyRepository;
 
-    public InterviewReservationQueue() {
+    public InterviewReservationQueue(CompanyRepository companyRepository) {
+        this.companyRepository = companyRepository;
         interviewQueueMap = new HashMap<>();
     }
 
@@ -60,7 +64,9 @@ public class InterviewReservationQueue {
     public void joinInterviewReservation(Long companyId, Student student) {
         if (interviewQueueMap.containsKey(companyId)) {
             Queue<Reservation> reservations = interviewQueueMap.get(companyId);
-            int order = reservations.size();
+            Company company = companyRepository.getCompany(companyId).get();
+            int order = company.getInterviewCount();
+            company.increaseInterviewCount();
             Reservation reservation = new Reservation(student, order);
             reservations.add(reservation);
         }
@@ -76,6 +82,7 @@ public class InterviewReservationQueue {
 
     /**
      * 인터뷰 시작을 위해 가장 첫번째 대기 순서를 제거
+     *
      * @param companyId
      * @return
      */
@@ -85,6 +92,7 @@ public class InterviewReservationQueue {
 
     /**
      * 인터뷰 대기를 제거
+     *
      * @param companyNo
      * @param order
      */
@@ -101,6 +109,7 @@ public class InterviewReservationQueue {
 
     /**
      * 전체 대기 목록 조회
+     *
      * @return
      */
     public Map<Long, List<Reservation>> getReservations() {
@@ -129,7 +138,7 @@ public class InterviewReservationQueue {
             // 인터뷰를 더 많이한 학생은 적게한 학생보다 크다
             if ((o1.getStudent().getInterviewCount() - o2.getStudent().getInterviewCount()) != 0) {
                 return o1.getStudent().getInterviewCount() - o2.getStudent().getInterviewCount();
-            } else if ( (o1.getOrder() - o2.getOrder()) != 0) {
+            } else if ((o1.getOrder() - o2.getOrder()) != 0) {
                 return o1.getOrder() - o2.getOrder();
             } else {
                 return o1.getStudent().getTraineeNo().compareTo(o2.getStudent().getTraineeNo());

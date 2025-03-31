@@ -16,12 +16,9 @@ import org.springframework.stereotype.Component;
 public class StudentService {
 
     private final StudentRepository studentRepository;
-    private final IOManager ioManager;
 
-
-    public StudentService(StudentRepository studentRepository, IOManager ioManager) {
+    public StudentService(StudentRepository studentRepository) {
         this.studentRepository = studentRepository;
-        this.ioManager = ioManager;
     }
 
     public void registerStudent(String traineeNo, String traineeName) {

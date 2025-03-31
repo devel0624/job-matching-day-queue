@@ -4,6 +4,7 @@ import com.nhnacademy.jobmatchingday.domain.Company;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
@@ -28,12 +29,20 @@ public class CompanyRepository {
 
     public Company save(Company company) {
 
-        int id = companyMap.size();
-        Company newCompany = new Company((long) id, company.getName());
+        Long id = company.getId();
 
-        companyMap.put(newCompany.getId(), newCompany);
+        if (Objects.isNull(id)) {
+            Long key = Integer.valueOf(companyMap.size()).longValue();
+            while (companyMap.containsKey(key)) {
+                key++;
+            }
+            company = new Company(key, company.getName());
+            id = company.getId();
+        }
 
-        return newCompany;
+        companyMap.put(id, company);
+
+        return company;
     }
 
     public boolean remove(Long companyId) {

@@ -37,4 +37,5 @@ public class InterviewReservationController {
         reservationService.deleteReservation(companyNo, order);
         return "redirect:/";
     }
+    
 }

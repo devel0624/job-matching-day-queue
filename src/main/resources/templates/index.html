@@ -42,8 +42,7 @@
             <th class="col-1">완료</th>
             <th class="col-2">진행 명단</th> <!-- 대기자 명단 열 너비 고정 -->
             <th class="col-1">취소</th>
-            <th class="col-1">시작</th>
-            <th class="col-3">대기자 명단</th> <!-- 대기자 명단 열 너비 고정 -->
+            <th class="col-4">대기자 명단</th> <!-- 대기자 명단 열 너비 고정 -->
             <th class="col-2">대기 등록</th>
         </tr>
         </thead>
@@ -91,14 +90,6 @@
                 </form>
             </td>
 
-<!--            진행 추가 버튼-->
-            <td class="align-middle">
-                <form action="/interview/process/start" method="post">
-                    <input name="companyNo" th:value="${company.id}" hidden>
-                    <button class="btn btn-success start-interview" type="submit">시작</button>
-                </form>
-            </td>
-
 <!--            대기자 명단-->
             <td class="align-middle">
                 <div class="d-flex flex-wrap gap-2">
@@ -106,7 +97,7 @@
                           th:each="reservation, iterStat : ${interviewReservations[company.id]}">
                         <input name="companyNo" th:value="${company.id}" hidden>
                         <input type="hidden" name="order" th:value="${reservation.order}">
-                        <button type="submit" class="card btn delete-reservation"
+                        <button type="button" class="card btn delete-reservation"
                             th:data-student-id="${reservation.student.traineeNo}">
                             <span>
                                 <span th:text="${iterStat.index + 1}"></span>
@@ -117,8 +108,28 @@
                 </div>
             </td>
 
+            <!-- 선택 모달 -->
+            <div id="selectionModal" class="modal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">선택해주세요</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>다음 중 선택해주세요:</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" id="enterButton">입장</button>
+                            <button type="button" class="btn btn-danger" id="deleteButton">삭제</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 <!--            대기자 추가 버튼 -->
-            <td >
+            <td class="align-middle">
                 <form action="/reservation" method="post">
                     <div class="d-flex">
                         <input name="companyNo" th:value="${company.id}" hidden>
@@ -234,19 +245,59 @@
     });
 
     const remove_reservation_buttons = document.querySelectorAll(".delete-reservation");
+    const selectionModal = document.getElementById("selectionModal");
+    const deleteButton = document.getElementById("deleteButton");
+    const enterButton = document.getElementById("enterButton");
 
-    remove_reservation_buttons.forEach(function (button) {
-        button.addEventListener("click", function (event) {
+    let currentForm = null;
+    let targetUrl = "";
+
+
+    remove_reservation_buttons.forEach(button => {
+        button.addEventListener("click", event => {
             event.preventDefault();
 
-            if (confirm("대기열에서 삭제하시겠습니까?")) {
-                alert("항목에서 제거하였습니다.");
-                button.closest("form").submit();
-            } else {
-                alert("취소되었습니다.");
-            }
+            // 클릭된 form을 저장
+            currentForm = button.closest("form");
+
+            // 모달 띄우기
+            const bootstrapModal = new bootstrap.Modal(selectionModal);
+            bootstrapModal.show();
         });
     });
+
+    // 삭제 버튼 클릭 시
+    deleteButton.addEventListener("click", () => {
+        if (confirm("대기열에서 삭제하시겠습니까?")) {
+            alert("항목에서 제거하였습니다.");
+            targetUrl = "/reservation/delete";
+            currentForm.action = targetUrl;
+            currentForm.submit();
+        } else {
+            alert("취소되었습니다.");
+        }
+    });
+
+    // 입장 버튼 클릭 시
+    enterButton.addEventListener("click", () => {
+        alert("면접을 시작합니다.");
+        targetUrl = "/interview/process/start";
+        currentForm.action = targetUrl;
+        currentForm.submit();
+    });
+
+    // remove_reservation_buttons.forEach(function (button) {
+    //     button.addEventListener("click", function (event) {
+    //         event.preventDefault();
+    //
+    //         if (confirm("대기열에서 삭제하시겠습니까?")) {
+    //             alert("항목에서 제거하였습니다.");
+    //             button.closest("form").submit();
+    //         } else {
+    //             alert("취소되었습니다.");
+    //         }
+    //     });
+    // });
 
     document.addEventListener("DOMContentLoaded", function () {
         let globalProgressList = new Set(); // 진행 중인 모든 학생 ID 저장

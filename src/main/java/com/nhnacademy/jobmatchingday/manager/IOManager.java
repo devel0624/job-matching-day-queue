@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  * @since : 1.0
  */
 
-@Component
+
 public class IOManager {
 
     private final ObjectMapper objectMapper;

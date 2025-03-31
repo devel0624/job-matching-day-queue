@@ -26,7 +26,6 @@ public class StudentService {
 
     public void registerStudent(String traineeNo, String traineeName) {
         studentRepository.save(new Student(traineeNo, traineeName));
-        ioManager.writeFile("trainees.json", studentRepository.findAll());
 
     }
 
